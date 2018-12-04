@@ -1,12 +1,33 @@
+#include <conio.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tchar.h>
+#include <unistd.h>
+#include <windows.h>
 
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+
+// Clearing the shell using escape sequences
+#define clear() printf("\033[H\033[J")
+
+#define _WIN32_WINNT 0x0501
 #define RL_BUFSIZE 1024
-
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
+#define BUFFER_SIZE MAX_PATH  // The maximum path of 32,767 characters is approximate as per MSDN documentation.
+//CurDir_Buffer is the container for the current directory
+TCHAR CurDir_Buffer[BUFFER_SIZE + 1]; // the +1 is for the NULL terminating character
 
+// variable that controls the relaunch of the shell
+int restart = 0;
+
+
+
+// THE BUILTIN FUNCTION IMPLEMENTATION STARTS HERE
 
 // function declaration for builtin shell commands
 int shell_cd(char **args);
@@ -17,6 +38,7 @@ int shell_copy(char **args);
 int shell_date(char **args);
 int shell_del(char **args);
 int shell_dir(char **args);
+int shell_exit(char **args);
 int shell_help(char **args);
 int shell_mkdir(char **args);
 int shell_move(char **args);
@@ -36,6 +58,7 @@ char *builtin_cmd[] = {
   "date",
   "del",
   "dir",
+  "exit",
   "help",
   "mkdir",
   "move",
@@ -54,20 +77,101 @@ int(*builtin_func[]) (char **) = {
   &shell_date,
   &shell_del,
   &shell_dir,
+  &shell_exit,
   &shell_help,
   &shell_mkdir,
   &shell_move,
   &shell_rename,
   &shell_rmdir,
   &shell_time,
-  &shell_type,
+  &shell_type
 };
 
 int num_builtins() {
   return sizeof(builtin_cmd) / sizeof(char *);
 }
 
+// Builtin functionn implementation starts here.
 
+// Changes the current directory.
+int shell_cd(char **args) {
+  GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+  if(args[1] == NULL) {
+    fprintf(stderr, "expected argument to \"cd\"\n");
+  } else {
+    if(chdir(args[1]) != 0) {
+      perror("Argument not found! \n");
+    }
+  }
+  return 1;
+}
+
+
+// exactly the same as the command "cd", changes the current directory.
+int shell_chdir(char **args) {
+  GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+  if(args[1] == NULL) {
+    fprintf(stderr, "expected argument to \"cd\"\n");
+  } else {
+    if(chdir(args[1]) != 0) {
+      perror("Argument not found! \n");
+    }
+  }
+  return 1;
+}
+
+
+// Starts a new instance of the shell.
+int shell_cmd() {
+  restart = 1;// flagged to start a new instance of the shell.
+
+  return 0; // gets out of the current loop
+}
+
+
+// prints the list of the available commands
+int shell_help(char **args) {
+  int i;
+  printf("Type the program names and arguments, then hit enter.\n");
+  printf("The following are built in:\n");
+
+  for(i = 0; i < num_builtins(); i++) {
+    printf("  %s\n", builtin_cmd[i]);
+  }
+  return 1;
+}
+
+
+// a signal for the command loop to terminate
+int shell_exit(char **args) {
+  return 0;
+}
+
+
+// lunch either a builtin or a process
+int shell_execute(char **args) {
+  int i;
+
+  if(args[0] == NULL) {
+    // empty command input
+    return 1;
+  }
+
+  for(i = 0; i < num_builtins(); i++) {
+      if(strcmp(args[0], "cd..") == 0) {
+        args[0] = "cd";
+        args[1] = "..";
+      }
+    if(strcmp(args[0], builtin_cmd[i]) == 0) {
+       return(*builtin_func[i])(args);
+    }
+  }
+  printf("Error: \"%s\"is not a builtin command.", args[0]);
+  return 1;
+}
+
+
+// Read a line of input from stdin.
 char *read_line(void) {
   int bufsize = RL_BUFSIZE;
   int position = 0;
@@ -83,7 +187,8 @@ char *read_line(void) {
     // read a character
     c = getchar();
 
-    // If we hit EOF, replace it with a null character and return
+    // if we hit EOF, replace it with a null character and return
+    // EOF us an integer, not a character
     if (c == EOF || c == '\n') {
       buffer[position] = '\0';
       return buffer;
@@ -136,33 +241,57 @@ char **split_line(char *line) {
 }
 
 
+// mini UI/initialization for the shell program
+void init_shell() {
+  system("cls");
+  printf("\n\n\n\n--------------------------------");
+  printf("\n\n\n\n------------C SHELL-------------");
+  printf("\n\n\n\n------by: Lumanta & Okiya-------");
+  printf("\n\n\n\n--------------------------------");
+  Sleep(3000);
+  system("cls");
+}
+
+
+// a loop getting an input and executing it.
 void loop(void) {
   char *line;
   char **args;
   int status;
 
-  printf("C-Shell build 1.0 by /n Lumanta & Okiya");
+  init_shell();
 
   do {
-    printf("> ");
+    // get the current directory where the program is running
+    GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+    printf(("\n%s>"), CurDir_Buffer);
+
+    // read the command from the standard input
     line = read_line();
+
+    /* parsing/separation/tokenization of the command string
+     * into a program and arguments.
+     */
     args = split_line(line);
+
+    // run the parsed command
     status = shell_execute(args);
 
     free(line);
     free(args);
-  } while(status);
+  } while(status != 0);
 }
 
 
-
 int main() {
-  // load configuration files
+  do {
+    restart = 0;
+    // run command loop
+    loop();
+    if(restart == 0) {
+      return EXIT_SUCCESS;
+    }
+  }while(restart == 1);
 
-  // run command loop
-  loop();
-
-  // perform any shutdown/cleanup
-
-  return EXIT_SUCCESS;
+  return 0;
 }
