@@ -11,9 +11,6 @@
 #undef _WIN32_WINNT
 #endif
 
-// Clearing the shell using escape sequences
-#define clear() printf("\033[H\033[J")
-
 #define _WIN32_WINNT 0x0501
 #define RL_BUFSIZE 1024
 #define TOK_BUFSIZE 64
@@ -121,11 +118,42 @@ int shell_chdir(char **args) {
 }
 
 
+// clears the screen
+int shell_cls() {
+  return 1;
+}
+
+
 // Starts a new instance of the shell.
 int shell_cmd() {
   restart = 1;// flagged to start a new instance of the shell.
 
   return 0; // gets out of the current loop
+}
+
+
+
+// copies one or more files to another location
+int shell_copy(char **args) {
+  return 1;
+}
+
+
+// displays or sets the date.
+int shell_date(char **args) {
+  return 1;
+}
+
+
+// deletes one or more files.
+int shell_del(char **args) {
+  return 1;
+}
+
+
+// displays a list of files and subdirectories in a directory.
+int shell_dir(char **args) {
+  return 1;
 }
 
 
@@ -138,6 +166,42 @@ int shell_help(char **args) {
   for(i = 0; i < num_builtins(); i++) {
     printf("  %s\n", builtin_cmd[i]);
   }
+  return 1;
+}
+
+
+// creates a directory.
+int shell_mkdir(char **args) {
+  return 1;
+}
+
+
+// moves one or more files from one directory to another directory.
+int shell_move(char **args) {
+  return 1;
+}
+
+
+// rename a file or files.
+int shell_rename(char **args) {
+  return 1;
+}
+
+
+// removes a directory
+int shell_rmdir(char **args) {
+  return 1;
+}
+
+
+// displays or sets a system time.
+int shell_time(char **args) {
+  return 1;
+}
+
+
+// displays the contents of a text file.
+int shell_type(char **args) {
   return 1;
 }
 
