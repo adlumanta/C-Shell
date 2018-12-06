@@ -1,3 +1,15 @@
+/* CMSC 125 Operating Systems
+ * A.Y. 2018 - 2019 Semester 1
+ * University of the Philippines Cebu
+ *
+ * CAPSTONE PROJECT: SHELL
+ * Description: Implementing a kernel interface using C Programming language.
+ *
+ * Created by:
+ * Okiya, Franklin
+ * Lumanta, Angelo Rey
+ */
+
 #include <conio.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -15,18 +27,13 @@
 #define RL_BUFSIZE 1024
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
-#define BUFFER_SIZE MAX_PATH  // The maximum path of 32,767 characters is approximate as per MSDN documentation.
-//CurDir_Buffer is the container for the current directory
-TCHAR CurDir_Buffer[BUFFER_SIZE + 1]; // the +1 is for the NULL terminating character
+#define BUFFER_SIZE MAX_PATH              // The maximum path of 32,767 characters is approximate as per MSDN documentation.
 
-// variable that controls the relaunch of the shell
-int restart = 0;
+TCHAR CurDir_Buffer[BUFFER_SIZE + 1];     // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
 
+int restart = 0;                          // variable that controls the relaunch of the shell
 
-
-// THE BUILTIN FUNCTION IMPLEMENTATION STARTS HERE
-
-// function declaration for builtin shell commands
+/* BUILT-IN IMPLEMENTATIONS */
 int shell_cd(char **args);
 int shell_chdir(char **args);
 int shell_cls();
@@ -45,7 +52,7 @@ int shell_time(char **args);
 int shell_type(char **args);
 
 
-// list of builtin commands, followed by their correspondng functions.
+/* list of builtin commands followed by their correspondng functions */
 char *builtin_cmd[] = {
   "cd",
   "chdir",
@@ -88,9 +95,9 @@ int num_builtins() {
   return sizeof(builtin_cmd) / sizeof(char *);
 }
 
-// Builtin functionn implementation starts here.
+/* BUILT-IN IMPLEMENTATIONS */
 
-// Changes the current directory.
+/* CD - Displays the current directory */
 int shell_cd(char **args) {
   GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
   if(args[1] == NULL) {
@@ -104,7 +111,7 @@ int shell_cd(char **args) {
 }
 
 
-// exactly the same as the command "cd", changes the current directory.
+/* CHDIR - Changes the current directory */
 int shell_chdir(char **args) {
   GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
   if(args[1] == NULL) {
@@ -118,13 +125,13 @@ int shell_chdir(char **args) {
 }
 
 
-// clears the screen
+/* CLS - Clear console */
 int shell_cls() {
   return 1;
 }
 
 
-// Starts a new instance of the shell.
+/* CMD - Starts a new instance of the command interpreter/shell */
 int shell_cmd() {
   restart = 1;// flagged to start a new instance of the shell.
 
@@ -133,31 +140,31 @@ int shell_cmd() {
 
 
 
-// copies one or more files to another location
+/* COPY - copies one or more files to another location */
 int shell_copy(char **args) {
   return 1;
 }
 
 
-// displays or sets the date.
+/* DATE - displays the date */
 int shell_date(char **args) {
   return 1;
 }
 
 
-// deletes one or more files.
+/* DELETE - deletes one or more files */
 int shell_del(char **args) {
   return 1;
 }
 
 
-// displays a list of files and subdirectories in a directory.
+/* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
   return 1;
 }
 
 
-// prints the list of the available commands
+/* HELP - Print the list of available commands */
 int shell_help(char **args) {
   int i;
   printf("Type the program names and arguments, then hit enter.\n");
@@ -170,49 +177,49 @@ int shell_help(char **args) {
 }
 
 
-// creates a directory.
+/* MKDIR - creates a new directory/folder */
 int shell_mkdir(char **args) {
   return 1;
 }
 
 
-// moves one or more files from one directory to another directory.
+/* MOVE - moves one or more files from one directory to another directory */
 int shell_move(char **args) {
   return 1;
 }
 
 
-// rename a file or files.
+/* RENAME - rename a file or files */
 int shell_rename(char **args) {
   return 1;
 }
 
 
-// removes a directory
+/* RMDIR - removes a directory */
 int shell_rmdir(char **args) {
   return 1;
 }
 
 
-// displays or sets a system time.
+/* TIME - displays or sets asystem time */
 int shell_time(char **args) {
   return 1;
 }
 
 
-// displays the contents of a text file.
+/* TYPE - displays the contents of a text file */
 int shell_type(char **args) {
   return 1;
 }
 
 
-// a signal for the command loop to terminate
+/* A signal for the command loop to terminate */
 int shell_exit(char **args) {
   return 0;
 }
 
 
-// lunch either a builtin or a process
+/* launch either a builtin or a proces */
 int shell_execute(char **args) {
   int i;
 
@@ -235,7 +242,7 @@ int shell_execute(char **args) {
 }
 
 
-// Read a line of input from stdin.
+/* Reads a line of input from stdin */
 char *read_line(void) {
   int bufsize = RL_BUFSIZE;
   int position = 0;
@@ -274,7 +281,7 @@ char *read_line(void) {
 }
 
 
-// separate the command string into program and arguments
+/* Separate the command string into program and arguments */
 char **split_line(char *line) {
   int bufsize = TOK_BUFSIZE, position = 0;
   char **tokens = malloc(bufsize * sizeof(char*));
@@ -304,26 +311,11 @@ char **split_line(char *line) {
   return tokens;
 }
 
-
-// mini UI/initialization for the shell program
-void init_shell() {
-  system("cls");
-  printf("\n\n\n\n--------------------------------");
-  printf("\n\n\n\n------------C SHELL-------------");
-  printf("\n\n\n\n------by: Lumanta & Okiya-------");
-  printf("\n\n\n\n--------------------------------");
-  Sleep(3000);
-  system("cls");
-}
-
-
-// a loop getting an input and executing it.
+/* A loop getting an input and executing it */
 void loop(void) {
   char *line;
   char **args;
   int status;
-
-  init_shell();
 
   do {
     // get the current directory where the program is running
@@ -346,11 +338,9 @@ void loop(void) {
   } while(status != 0);
 }
 
-
 int main() {
   do {
     restart = 0;
-    // run command loop
     loop();
     if(restart == 0) {
       return EXIT_SUCCESS;
