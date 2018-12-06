@@ -52,7 +52,7 @@ int shell_time(char **args);
 int shell_type(char **args);
 
 
-/* list of builtin commands followed by their correspondng functions */
+/* List of builtin commands followed by their correspondng functions */
 char *builtin_cmd[] = {
   "cd",
   "chdir",
