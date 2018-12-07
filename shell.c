@@ -34,14 +34,14 @@
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
 
-#define BUFFER_SIZE MAX_PATH // The maximum path of 32,767 characters is approximate as per MSDN documentation.
+#define BUFFER_SIZE MAX_PATH                    // The maximum path of 32,767 characters is approximate as per MSDN documentation.
 
-TCHAR CurDir_Buffer[BUFFER_SIZE + 1]; // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
+TCHAR CurDir_Buffer[BUFFER_SIZE + 1];           // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
 
-int restart = 0;  // variable that controls the relaunch of the shell
+int restart = 0;                                // variable that controls the relaunch of the shell
 
 
-// checks whether a file is a directory or just a file
+// Checks whether a file is a directory or just a file
 int is_regular_file(const char *path) {
     struct stat path_stat;
     stat(path, &path_stat);
