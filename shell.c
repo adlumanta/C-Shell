@@ -9,9 +9,11 @@
  * Okiya, Franklin
  * Lumanta, Angelo Rey
  */
-
-#include <conio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <conio.h>  // chdir()
 #include <ctype.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,19 +26,32 @@
 #endif
 
 #define _WIN32_WINNT 0x0501
+
+// Read Line Input
 #define RL_BUFSIZE 1024
+
+// Split Line Input
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
-#define BUFFER_SIZE MAX_PATH              // The maximum path of 32,767 characters is approximate as per MSDN documentation.
 
-TCHAR CurDir_Buffer[BUFFER_SIZE + 1];     // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
+#define BUFFER_SIZE MAX_PATH // The maximum path of 32,767 characters is approximate as per MSDN documentation.
 
-int restart = 0;                          // variable that controls the relaunch of the shell
+TCHAR CurDir_Buffer[BUFFER_SIZE + 1]; // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
 
-/* BUILT-IN IMPLEMENTATIONS */
+int restart = 0;  // variable that controls the relaunch of the shell
+
+
+// checks whether a file is a directory or just a file
+int is_regular_file(const char *path) {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
+
+/* BUILTIN FUNCTIONS INITIALIZATION */
 int shell_cd(char **args);
 int shell_chdir(char **args);
-int shell_cls();
+int shell_cls(char **args);
 int shell_cmd();
 int shell_copy(char **args);
 int shell_date(char **args);
@@ -95,13 +110,16 @@ int num_builtins() {
   return sizeof(builtin_cmd) / sizeof(char *);
 }
 
+
+
 /* BUILT-IN IMPLEMENTATIONS */
+
 
 /* CD - Displays the current directory */
 int shell_cd(char **args) {
   GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
   if(args[1] == NULL) {
-    fprintf(stderr, "expected argument to \"cd\"\n");
+    printf("\n%s\n", CurDir_Buffer);
   } else {
     if(chdir(args[1]) != 0) {
       perror("Argument not found! \n");
@@ -109,24 +127,56 @@ int shell_cd(char **args) {
   }
   return 1;
 }
+
 
 
 /* CHDIR - Changes the current directory */
 int shell_chdir(char **args) {
   GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
   if(args[1] == NULL) {
-    fprintf(stderr, "expected argument to \"cd\"\n");
+    fprintf(stderr, "expected argument to \"chdir\"\n");
   } else {
     if(chdir(args[1]) != 0) {
       perror("Argument not found! \n");
+    }
+    else {
+      printf("Changed directory! \n");
     }
   }
   return 1;
 }
 
 
+
 /* CLS - Clear console */
-int shell_cls() {
+int shell_cls(char **args) {
+  HANDLE                     hStdOut;
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  DWORD                      count;
+  DWORD                      cellCount;
+  COORD                      homeCoords = { 0, 0 };
+
+  hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
+  if (hStdOut == INVALID_HANDLE_VALUE) return;
+
+  /* Get the number of cells in the current buffer */
+  if(!GetConsoleScreenBufferInfo( hStdOut, &csbi ))
+    return;
+
+  /* compute the total number of cells in the screen */
+  cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+
+  /* Fill the entire buffer with spaces */
+  if(!FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count))
+    return;
+
+  /* Fill the entire buffer with the current colors and attributes */
+  if(!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords,&count))
+    return;
+
+  /* Move the cursor home */
+  SetConsoleCursorPosition( hStdOut, homeCoords );
+
   return 1;
 }
 
@@ -137,7 +187,6 @@ int shell_cmd() {
 
   return 0; // gets out of the current loop
 }
-
 
 
 /* COPY - copies one or more files to another location */
@@ -154,17 +203,39 @@ int shell_date(char **args) {
 
 /* DELETE - deletes one or more files */
 int shell_del(char **args) {
+  if(args[1] == NULL) {
+    fprintf(stderr, "expected argument to \"del\"\n");
+  }
+  else {
+    // File checker
+    if(is_regular_file(args[1]))
+      remove(args[1]);
+  }
+
   return 1;
 }
 
 
 /* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
+  DIR *d;
+  struct dirent *dir; // Pointer for directory entry
+
+  d = opendir("."); // opendir() returns a pointer of DIR type.
+
+  // opendir returns NULL if couldn't open directory
+  if (d == NULL) {
+    printf("Could not open current directory");
+  }
+  while ((dir = readdir(d)) != NULL)
+    printf("%s\n", dir->d_name);
+
+  closedir(d);
   return 1;
 }
 
 
-/* HELP - Print the list of available commands */
+/* HELP - Print  the list of available commands */
 int shell_help(char **args) {
   int i;
   printf("Type the program names and arguments, then hit enter.\n");
@@ -335,8 +406,11 @@ void loop(void) {
 
     free(line);
     free(args);
-  } while(status != 0);
+  } while(status != 0); // loop until the user doesn't "exit" the program
 }
+
+
+// MAIN FUNCTION
 
 int main() {
   do {
