@@ -9,6 +9,7 @@
  * Okiya, Franklin
  * Lumanta, Angelo Rey
  */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <conio.h>        //  "Console Input Output Header File” - manages input/output on console based application.
@@ -196,6 +197,13 @@ int shell_copy(char **args) {
 
 /* DATE - displays the date */
 int shell_date(char **args) {
+
+    // show time if there are no parameters
+    if(args[1] == NULL) {
+
+    }
+
+
     return 1;
 }
 
@@ -204,7 +212,8 @@ int shell_date(char **args) {
 int shell_del(char **args) {
     if(args[1] == NULL) {
         fprintf(stderr, "Expected argument to \"del\"\n");
-    } else {
+    } 
+    else {
         if(is_regular_file(args[1]))    // File checker
         remove(args[1]);
     }
@@ -245,6 +254,23 @@ int shell_help(char **args) {
 
 /* MKDIR - creates a new directory/folder */
 int shell_mkdir(char **args) {
+    int check;
+
+    if(args[1] == NULL) {
+        fprintf(stderr, "Expected argument to \"mkdir\"\n");
+    }
+
+    char* dirname = args[1];
+    check = mkdir(dirname);
+
+    // chekc if directory is created or not
+    if(!check) {
+        printf("Successfully created the directory. \n");
+    }
+    else {
+        perror("Unable to create the directory. \n");
+    }
+
     return 1;
 }
 
@@ -257,6 +283,23 @@ int shell_move(char **args) {
 
 /* RENAME - rename a file or files */
 int shell_rename(char **args) {
+
+    // checks whether args[1] or args[2] is emptyd
+    if(args[1] == NULL || args[2] == NULL) {
+        fprintf(stderr, "Expected argument to \"rename\"\n");
+    }
+    else {
+        // args[1] - existing file name, args[2] - new file name
+        // if the rename function's return value is 0, then the file changed its name successfully.
+        // else, an error is returned.
+        if(rename(args[1], args[2]) == 0) {
+            printf("Successfully renamed the file. \n");
+        }
+        else {
+            perror("Unable to rename the file! \n");
+        }
+    }
+
     return 1;
 }
 
@@ -310,7 +353,7 @@ int shell_execute(char **args) {
         }
     }
 
-    printf("Error: \"%s\" is not a built-in command.", args[0]);
+    printf("Error: \"%s\" is not a built-in command. \n", args[0]);
     return 1;
 }
 
