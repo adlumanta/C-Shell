@@ -21,6 +21,7 @@
 #include <tchar.h>
 #include <unistd.h>
 #include <windows.h>
+#include <time.h>
 
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
@@ -212,7 +213,7 @@ int shell_date(char **args) {
 int shell_del(char **args) {
     if(args[1] == NULL) {
         fprintf(stderr, "Expected argument to \"del\"\n");
-    } 
+    }
     else {
         if(is_regular_file(args[1]))    // File checker
         remove(args[1]);
@@ -222,18 +223,28 @@ int shell_del(char **args) {
 
 
 /* DIR - Displays a list of files and subdirectories in a directory */
+/* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
     DIR *d;
-    struct dirent *dir; // Pointer for directory entry
+    struct dirent *dir;     // Pointer for directory entry
+    struct stat attr;       // Data structure containing detailed file information
+    struct tm *timeStamp;   // Structure containing a calendar date and time broken down into its components
 
-    d = opendir("."); // opendir() returns a pointer of DIR type.
+    char time[20];          // Timestamp
+
+    d = opendir(".");       // opendir() returns a pointer of DIR type.
 
     // opendir returns NULL if couldn't open directory
     if (d == NULL) {
         printf("Could not open current directory");
     }
+    printf(" DATE MODIFIED       \tFILES/FOLDERS\n");
     while ((dir = readdir(d)) != NULL) {
-        printf("%s\n", dir->d_name);
+        stat(dir->d_name, &attr);
+        timeStamp = localtime (&attr.st_mtime);                         //Getting time modification attributes of the directory/file
+        strftime(time, sizeof(time), "%m/%d/%Y %I:%M %p", timeStamp);
+        printf("%20s\t%s\n", time, dir->d_name);
+
     }
     closedir(d);
     return 1;
