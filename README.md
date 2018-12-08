@@ -4,7 +4,7 @@
 *Instructor: Dhong Fhel G. Gom-os*<br />
 <br />
 Implementing a kernel interface in Windows Command Prompt in C Programming Language.<br /><br />
-###Contributors: <br />
+Contributors:
 - Lumanta, Angelo Rey
 - Okiya, Franklin
 
