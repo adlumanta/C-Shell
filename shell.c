@@ -509,11 +509,11 @@ void loop(void) {
          */
         args = split_line(line);
         if(args[0] == NULL) {
-            status = 1;
+            status = 1;                         // Resolve enter-terminate program issue
         } else {
             status = shell_execute(args);       // Run the parsed command
         }
-        
+
         free(line);                         // Deallocates the memory previously allocated
         free(args);
     } while(status != 0);                   // Loop until the user doesn't "exit" the program
