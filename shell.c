@@ -82,6 +82,7 @@ char *builtin_cmd[] = {
   "type"
 };
 
+
 int(*builtin_func[]) (char **) = {
   &shell_cd,
   &shell_chdir,
@@ -101,22 +102,34 @@ int(*builtin_func[]) (char **) = {
   &shell_type
 };
 
+
 int num_builtins() {
     return sizeof(builtin_cmd) / sizeof(char *);
 }
 
-// Checks whether a file is a directory or just a file
+
+/* Checks whether a file is a directory or just a file */
 int is_regular_file(const char *path) {
     struct stat path_stat;
     stat(path, &path_stat);
     return S_ISREG(path_stat.st_mode);
 }
 
-// Checking for rmdir
+
+/* Checking for rmdir */
 int is_directory(const char *path) {
     struct stat path_stat;
     stat(path, &path_stat);
     return S_ISDIR(path_stat.st_mode);
+}
+
+
+/* Converts tokens to lowercase to remove case sensitivity */
+char *toLowerCase(char *str) {
+    for(int i = 0; str[i]; i++){
+        str[i] = tolower(str[i]);
+    }
+    return str;
 }
 
 /* BUILT-IN IMPLEMENTATIONS */
@@ -137,7 +150,6 @@ int shell_cd(char **args) {
 }
 
 
-
 /* CHDIR - Changes the current directory */
 int shell_chdir(char **args) {
     GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
@@ -154,7 +166,6 @@ int shell_chdir(char **args) {
     }
     return 1;
 }
-
 
 
 /* CLS - Clear console */
@@ -200,6 +211,7 @@ int shell_copy(char **args) {
     return 1;
 }
 
+
 /* DATE - displays the date */
 int shell_date(char **args) {
     return 1;
@@ -220,6 +232,7 @@ int shell_del(char **args) {
     }
     return 1;
 }
+
 
 /* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
@@ -278,6 +291,7 @@ int shell_help(char **args) {
     return 1;
 }
 
+
 /* MKDIR - creates a new directory/folder */
 int shell_mkdir(char **args) {
     int check;
@@ -332,8 +346,9 @@ int shell_rename(char **args) {
 
 /* RMDIR - removes a directory */
 int shell_rmdir(char **args) {
+
     if(args[1] == NULL) {
-        fprintf(stderr, "Expected argument to \"del\"\n");
+        fprintf(stderr, "Expected argument to \"rmdir\"\n");
     }
     else {
         if(is_directory(args[1])) {    // File checker
@@ -344,6 +359,7 @@ int shell_rmdir(char **args) {
     }
     return 1;
 }
+
 
 /* TIME - displays or sets system time */
 int shell_time(char **args) {
@@ -380,22 +396,17 @@ int shell_type(char **args) {
     return 1;
 }
 
+
 /*
- *  END OF BUILT-IN IMPLEMENTATIONS. BELOW IS FUNCTIONS TO HANDLE USER INPUT, AND TOKENIZING ARGUMENTS
+ *  END OF BUILT-IN IMPLEMENTATIONS. BELOW IS FUNCTIONS TO HANDLE USER INPUT AND TOKENIZING ARGUMENTS
  */
+
 
 /* A signal for the command loop to terminate */
 int shell_exit(char **args) {
     return 0;
 }
 
-/* Converts tokens to lowercase to remove case sensitivity */
-char *toLowerCase(char *str) {
-	for(int i = 0; str[i]; i++){
-	    str[i] = tolower(str[i]);
-	}
-	return str;
-}
 
 /* launch either a builtin or a proces */
 int shell_execute(char **args) {
@@ -459,6 +470,7 @@ char *read_line(void) {
     }
 }
 
+
 /* Separate the command string into program and arguments */
 char **split_line(char *line) {
     int bufsize = TOK_BUFSIZE, position = 0;
@@ -493,6 +505,7 @@ char **split_line(char *line) {
     return tokens;
 }
 
+
 /* THE COMMAND LOOP */
 void loop(void) {
     char *line;     // Array of characters from user input
@@ -518,6 +531,7 @@ void loop(void) {
         free(args);
     } while(status != 0);                   // Loop until the user doesn't "exit" the program
 }
+
 
 
 /*  MAIN FUNCTION */
