@@ -278,7 +278,6 @@ int shell_help(char **args) {
     return 1;
 }
 
-
 /* MKDIR - creates a new directory/folder */
 int shell_mkdir(char **args) {
     int check;
@@ -333,6 +332,16 @@ int shell_rename(char **args) {
 
 /* RMDIR - removes a directory */
 int shell_rmdir(char **args) {
+    if(args[1] == NULL) {
+        fprintf(stderr, "Expected argument to \"del\"\n");
+    }
+    else {
+        if(is_directory(args[1])) {    // File checker
+            rmdir(args[1]);
+        } else {
+            printf("Unsuccessful. Either you are trying to delete a file or the folder does not exist.\n");
+        }
+    }
     return 1;
 }
 
