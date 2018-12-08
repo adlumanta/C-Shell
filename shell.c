@@ -238,12 +238,12 @@ int shell_dir(char **args) {
     if (d == NULL) {
         printf("Could not open current directory");
     }
-    printf(" DATE MODIFIED       \tFILES/FOLDERS\n");
+    printf(" DATE MODIFIED       \t\tFILES/FOLDERS\n");
     while ((dir = readdir(d)) != NULL) {
         stat(dir->d_name, &attr);
         timeStamp = localtime (&attr.st_mtime);                         //Getting time modification attributes of the directory/file
         strftime(time, sizeof(time), "%m/%d/%Y %I:%M %p", timeStamp);
-        printf("%20s\t%s\n", time, dir->d_name);
+        printf("%20s ---------- %s\n", time, dir->d_name);
 
     }
     closedir(d);
