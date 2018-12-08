@@ -152,7 +152,6 @@ int shell_chdir(char **args) {
 
 /* CLS - Clear console */
 int shell_cls(char **args) {
-<<<<<<< Updated upstream
     HANDLE                     hStdOut;
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     DWORD                      count;
@@ -173,37 +172,6 @@ int shell_cls(char **args) {
 
     /* Fill the entire buffer with spaces */
     if(!FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count)) {
-        return 1;
-    }
-=======
-  HANDLE                     hStdOut;
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  DWORD                      count;
-  DWORD                      cellCount;
-  COORD                      homeCoords = { 0, 0 };
-
-  hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-  if (hStdOut == INVALID_HANDLE_VALUE)
-    return 1;
-
-  /* Get the number of cells in the current buffer */
-  if(!GetConsoleScreenBufferInfo( hStdOut, &csbi ))
-    return 1;
-
-  /* compute the total number of cells in the screen */
-  cellCount = csbi.dwSize.X *csbi.dwSize.Y;
-
-  /* Fill the entire buffer with spaces */
-  if(!FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count))
-    return 1;
-
-  /* Fill the entire buffer with the current colors and attributes */
-  if(!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords,&count))
-    return 1;
->>>>>>> Stashed changes
-
-    /* Fill the entire buffer with the current colors and attributes */
-    if(!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords,&count)) {
         return 1;
     }
 
@@ -331,7 +299,6 @@ int shell_execute(char **args) {
     if(args[0] == NULL) {
         return 1;
     }
-<<<<<<< Updated upstream
 
     for(i = 0; i < num_builtins(); i++) {
         if(strcmp(args[0], "cd..") == 0) {
@@ -342,13 +309,9 @@ int shell_execute(char **args) {
             return(*builtin_func[i])(args);
         }
     }
-    printf("Error: \"%s\"is not a built-in command.", args[0]);
+
+    printf("Error: \"%s\" is not a built-in command.", args[0]);
     return 1;
-=======
-  }
-  printf("Error: \"%s\" is not a builtin command. \n", args[0]);
-  return 1;
->>>>>>> Stashed changes
 }
 
 
