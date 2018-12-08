@@ -136,7 +136,7 @@ int shell_chdir(char **args) {
     GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
 
     if(args[1] == NULL) {
-        fprintf(stderr, "expected argument to \"chdir\"\n");
+        fprintf(stderr, "Expected argument to \"chdir\"\n");
     } else {
         if(chdir(args[1]) != 0) {
             perror("Argument not found! \n");
