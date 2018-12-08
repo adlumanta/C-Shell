@@ -221,8 +221,6 @@ int shell_del(char **args) {
     return 1;
 }
 
-
-/* DIR - Displays a list of files and subdirectories in a directory */
 /* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
     DIR *d;
@@ -274,7 +272,7 @@ int shell_mkdir(char **args) {
     char* dirname = args[1];
     check = mkdir(dirname);
 
-    // chekc if directory is created or not
+    // Check if directory is created or not
     if(!check) {
         printf("Successfully created the directory. \n");
     }
