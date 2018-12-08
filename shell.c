@@ -112,6 +112,7 @@ int is_regular_file(const char *path) {
     return S_ISREG(path_stat.st_mode);
 }
 
+// Checking for rmdir
 int is_directory(const char *path) {
     struct stat path_stat;
     stat(path, &path_stat);
@@ -201,13 +202,6 @@ int shell_copy(char **args) {
 
 /* DATE - displays the date */
 int shell_date(char **args) {
-
-    // show time if there are no parameters
-    if(args[1] == NULL) {
-
-    }
-
-
     return 1;
 }
 
@@ -220,6 +214,8 @@ int shell_del(char **args) {
     else {
         if(is_regular_file(args[1])) {    // File checker
             remove(args[1]);
+        } else {
+            printf("Unsuccessful. Either you are trying to delete a folder or the file does not exist.\n");
         }
     }
     return 1;
@@ -261,12 +257,24 @@ int shell_dir(char **args) {
 
 /* HELP - Print  the list of available commands */
 int shell_help(char **args) {
-    int i;
-    printf("List of commands: \n");
-
-    for(i = 0; i < num_builtins(); i++) {
-        printf("  %s\n", builtin_cmd[i]);
-    }
+    printf(" COMMANDS: \n");
+    printf(" CD\t\tDisplays the name of or changes the current directory.\n");
+    printf(" CHDIR\t\tChanges the current directory.\n");
+    printf(" CLS\t\tClears the screen.\n");
+    printf(" CMD\t\tStarts a new instance of the command interpreter.\n");
+    printf(" COPY\t\tCopies one or more files to another location.\n");
+    printf(" DATE\t\tDisplays or sets the date.\n");
+    printf(" DEL\t\tDeletes one or more files.\n");
+    printf(" DIR\t\tDisplays a list of files and subdirectories in a directory.\n");
+    printf(" HELP\t\tPrint the list of available commands.\n");
+    printf(" MKDIR\t\tCreates a directory.\n");
+    printf(" MOVE\t\tMoves one or more files from one directory to another directory.\n");
+    printf(" RENAME\t\tRenames a file or files.\n");
+    printf(" RMDIR\t\tRemoves a directory.\n");
+    printf(" TIME\t\tDisplays or sets the system time.\n");
+    printf(" TYPE\t\tDisplays the contents of a text file.\n");
+    printf(" EXIT\t\tTerminates the program.\n\n");
+    printf(" These commands are based on Windows Command Prompt. (c)2018 Microsoft Corporation.\n");
     return 1;
 }
 
