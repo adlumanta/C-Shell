@@ -327,6 +327,23 @@ int shell_time(char **args) {
 
 /* TYPE - displays the contents of a text file */
 int shell_type(char **args) {
+    FILE *file;     // Initialize an object of the type FILE, which contains all the information necessary to control the stream
+    char ch;
+
+    file = fopen(args[1], "r");     // r - read file only
+    if (file == NULL) {
+        printf("File does not exist.\n");
+        return 1;
+    }
+
+    /* Read contents if the text file exists */
+    ch = fgetc(file);   // Used to obtain input from a file single character at a time
+    while (ch != EOF) {
+        printf ("%c", ch);
+        ch = fgetc(file);
+    }
+
+    fclose(file);
     return 1;
 }
 
