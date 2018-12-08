@@ -141,7 +141,8 @@ int shell_chdir(char **args) {
         if(chdir(args[1]) != 0) {
             perror("Argument not found! \n");
         } else {
-            printf("Changed directory! \n");
+            GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+            printf("\n%s\n", CurDir_Buffer);
         }
     }
     return 1;
@@ -313,7 +314,7 @@ int shell_execute(char **args) {
             return(*builtin_func[i])(args);
         }
     }
-    printf("Error: \"%s\"is not a builtin command.", args[0]);
+    printf("Error: \"%s\"is not a built-in command.", args[0]);
     return 1;
 }
 
