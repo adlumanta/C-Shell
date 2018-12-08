@@ -35,6 +35,7 @@
 // Split Line Input
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
+#define TOK_DELIM_TIME_DATE ":"
 
 #define BUFFER_SIZE MAX_PATH                    // The maximum path of 32,767 characters is approximate as per MSDN documentation.
 
@@ -327,9 +328,15 @@ int shell_rmdir(char **args) {
     return 1;
 }
 
-
 /* TIME - displays or sets system time */
 int shell_time(char **args) {
+    SYSTEMTIME time;
+
+    if(args[1] == NULL){
+        GetLocalTime(&time);
+        printf("The current time is: %d:%d:%d\n",time.wHour, time.wMinute, time.wSecond);
+    }
+    // TODO SetTime NOTE: I did everything but it does not work on my laptop.
     return 1;
 }
 
