@@ -195,7 +195,6 @@ int shell_copy(char **args) {
     return 1;
 }
 
-
 /* DATE - displays the date */
 int shell_date(char **args) {
 
@@ -319,7 +318,7 @@ int shell_rmdir(char **args) {
 }
 
 
-/* TIME - displays or sets asystem time */
+/* TIME - displays or sets system time */
 int shell_time(char **args) {
     return 1;
 }
@@ -346,6 +345,10 @@ int shell_type(char **args) {
     fclose(file);
     return 1;
 }
+
+/*
+ *  END OF BUILT-IN IMPLEMENTATIONS. BELOW IS FUNCTIONS TO HANDLE USER INPUT, AND TOKENIZING ARGUMENTS
+ */
 
 /* A signal for the command loop to terminate */
 int shell_exit(char **args) {
