@@ -15,13 +15,13 @@
 #include <conio.h>        //  "Console Input Output Header File” - manages input/output on console based application.
 #include <ctype.h>
 #include <dirent.h>
-#include <stdio.h>
+#include <stdio.h>         // Standard I/O
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
 #include <unistd.h>
 #include <windows.h>
-#include <time.h>
+#include <time.h>          // Get time format
 
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
@@ -41,14 +41,6 @@
 TCHAR CurDir_Buffer[BUFFER_SIZE + 1];           // CurDir_Buffer is the container for the current directory. the +1 is for the NULL terminating character
 
 int restart = 0;                                // variable that controls the relaunch of the shell
-
-
-// Checks whether a file is a directory or just a file
-int is_regular_file(const char *path) {
-    struct stat path_stat;
-    stat(path, &path_stat);
-    return S_ISREG(path_stat.st_mode);
-}
 
 /* BUILTIN FUNCTIONS INITIALIZATION */
 int shell_cd(char **args);
@@ -112,7 +104,18 @@ int num_builtins() {
     return sizeof(builtin_cmd) / sizeof(char *);
 }
 
+// Checks whether a file is a directory or just a file
+int is_regular_file(const char *path) {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
 
+int is_directory(const char *path) {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISDIR(path_stat.st_mode);
+}
 
 /* BUILT-IN IMPLEMENTATIONS */
 
@@ -122,7 +125,7 @@ int shell_cd(char **args) {
     GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
 
     if(args[1] == NULL) {
-        printf("\n%s\n", CurDir_Buffer);
+        printf("%s\n", CurDir_Buffer);
     } else {
         if(chdir(args[1]) != 0) {
             perror("Argument not found! \n");
@@ -144,7 +147,7 @@ int shell_chdir(char **args) {
             perror("Argument not found! \n");
         } else {
             GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
-            printf("\n%s\n", CurDir_Buffer);
+            printf("%s\n", CurDir_Buffer);
         }
     }
     return 1;
@@ -214,8 +217,9 @@ int shell_del(char **args) {
         fprintf(stderr, "Expected argument to \"del\"\n");
     }
     else {
-        if(is_regular_file(args[1]))    // File checker
-        remove(args[1]);
+        if(is_regular_file(args[1])) {    // File checker
+            remove(args[1]);
+        }
     }
     return 1;
 }
@@ -228,6 +232,7 @@ int shell_dir(char **args) {
     struct tm *timeStamp;   // Structure containing a calendar date and time broken down into its components
 
     char time[20];          // Timestamp
+    char type[9];
 
     d = opendir(".");       // opendir() returns a pointer of DIR type.
 
@@ -235,13 +240,18 @@ int shell_dir(char **args) {
     if (d == NULL) {
         printf("Could not open current directory");
     }
-    printf(" DATE MODIFIED       \t\tFILES/FOLDERS\n");
+    printf(" DATE MODIFIED  \t\t\t  FILES/FOLDERS\n");
     while ((dir = readdir(d)) != NULL) {
         stat(dir->d_name, &attr);
         timeStamp = localtime (&attr.st_mtime);                         //Getting time modification attributes of the directory/file
         strftime(time, sizeof(time), "%m/%d/%Y %I:%M %p", timeStamp);
-        printf("%20s ---------- %s\n", time, dir->d_name);
-
+        printf("%20s ----- ", time);
+        if(is_directory(dir->d_name)) {                                   // File checker
+            printf("<FOLDER> ----- ");
+        } else {
+            printf("<FILE> ------- ");
+        }
+        printf("%s\n", dir->d_name);
     }
     closedir(d);
     return 1;
