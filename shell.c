@@ -11,7 +11,7 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <conio.h>  // chdir()
+#include <conio.h>        //  "Console Input Output Header File” - manages input/output on console based application.
 #include <ctype.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -107,7 +107,7 @@ int(*builtin_func[]) (char **) = {
 };
 
 int num_builtins() {
-  return sizeof(builtin_cmd) / sizeof(char *);
+    return sizeof(builtin_cmd) / sizeof(char *);
 }
 
 
@@ -117,309 +117,315 @@ int num_builtins() {
 
 /* CD - Displays the current directory */
 int shell_cd(char **args) {
-  GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
-  if(args[1] == NULL) {
-    printf("\n%s\n", CurDir_Buffer);
-  } else {
-    if(chdir(args[1]) != 0) {
-      perror("Argument not found! \n");
+    GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+
+    if(args[1] == NULL) {
+        printf("\n%s\n", CurDir_Buffer);
+    } else {
+        if(chdir(args[1]) != 0) {
+            perror("Argument not found! \n");
+        }
     }
-  }
-  return 1;
+    return 1;
 }
 
 
 
 /* CHDIR - Changes the current directory */
 int shell_chdir(char **args) {
-  GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
-  if(args[1] == NULL) {
-    fprintf(stderr, "expected argument to \"chdir\"\n");
-  } else {
-    if(chdir(args[1]) != 0) {
-      perror("Argument not found! \n");
+    GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
+
+    if(args[1] == NULL) {
+        fprintf(stderr, "expected argument to \"chdir\"\n");
+    } else {
+        if(chdir(args[1]) != 0) {
+            perror("Argument not found! \n");
+        } else {
+            printf("Changed directory! \n");
+        }
     }
-    else {
-      printf("Changed directory! \n");
-    }
-  }
-  return 1;
+    return 1;
 }
 
 
 
 /* CLS - Clear console */
 int shell_cls(char **args) {
-  HANDLE                     hStdOut;
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  DWORD                      count;
-  DWORD                      cellCount;
-  COORD                      homeCoords = { 0, 0 };
+    HANDLE                     hStdOut;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    DWORD                      count;
+    DWORD                      cellCount;
+    COORD                      homeCoords = { 0, 0 };
 
-  hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-  if (hStdOut == INVALID_HANDLE_VALUE) return;
+    hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
+    if (hStdOut == INVALID_HANDLE_VALUE) {
+        return 1;
+    }
+    /* Get the number of cells in the current buffer */
+    if(!GetConsoleScreenBufferInfo( hStdOut, &csbi )) {
+        return 1;
+    }
 
-  /* Get the number of cells in the current buffer */
-  if(!GetConsoleScreenBufferInfo( hStdOut, &csbi ))
-    return;
+    /* compute the total number of cells in the screen */
+    cellCount = csbi.dwSize.X *csbi.dwSize.Y;
 
-  /* compute the total number of cells in the screen */
-  cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+    /* Fill the entire buffer with spaces */
+    if(!FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count)) {
+        return 1;
+    }
 
-  /* Fill the entire buffer with spaces */
-  if(!FillConsoleOutputCharacter(hStdOut, (TCHAR) ' ', cellCount, homeCoords, &count))
-    return;
+    /* Fill the entire buffer with the current colors and attributes */
+    if(!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords,&count)) {
+        return 1;
+    }
 
-  /* Fill the entire buffer with the current colors and attributes */
-  if(!FillConsoleOutputAttribute(hStdOut, csbi.wAttributes, cellCount, homeCoords,&count))
-    return;
-
-  /* Move the cursor home */
-  SetConsoleCursorPosition( hStdOut, homeCoords );
-
-  return 1;
+    /* Move the cursor home */
+    SetConsoleCursorPosition( hStdOut, homeCoords );
+    return 1;
 }
 
 
 /* CMD - Starts a new instance of the command interpreter/shell */
 int shell_cmd() {
-  restart = 1;// flagged to start a new instance of the shell.
-
-  return 0; // gets out of the current loop
+    restart = 1;// flagged to start a new instance of the shell.
+    return 0; // gets out of the current loop
 }
 
 
 /* COPY - copies one or more files to another location */
 int shell_copy(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* DATE - displays the date */
 int shell_date(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* DELETE - deletes one or more files */
 int shell_del(char **args) {
-  if(args[1] == NULL) {
-    fprintf(stderr, "expected argument to \"del\"\n");
-  }
-  else {
-    // File checker
-    if(is_regular_file(args[1]))
-      remove(args[1]);
-  }
-
-  return 1;
+    if(args[1] == NULL) {
+        fprintf(stderr, "Expected argument to \"del\"\n");
+    } else {
+        if(is_regular_file(args[1]))    // File checker
+        remove(args[1]);
+    }
+    return 1;
 }
 
 
 /* DIR - Displays a list of files and subdirectories in a directory */
 int shell_dir(char **args) {
-  DIR *d;
-  struct dirent *dir; // Pointer for directory entry
+    DIR *d;
+    struct dirent *dir; // Pointer for directory entry
 
-  d = opendir("."); // opendir() returns a pointer of DIR type.
+    d = opendir("."); // opendir() returns a pointer of DIR type.
 
-  // opendir returns NULL if couldn't open directory
-  if (d == NULL) {
-    printf("Could not open current directory");
-  }
-  while ((dir = readdir(d)) != NULL)
-    printf("%s\n", dir->d_name);
-
-  closedir(d);
-  return 1;
+    // opendir returns NULL if couldn't open directory
+    if (d == NULL) {
+        printf("Could not open current directory");
+    }
+    while ((dir = readdir(d)) != NULL) {
+        printf("%s\n", dir->d_name);
+    }
+    closedir(d);
+    return 1;
 }
 
 
 /* HELP - Print  the list of available commands */
 int shell_help(char **args) {
-  int i;
-  printf("Type the program names and arguments, then hit enter.\n");
-  printf("The following are built in:\n");
+    int i;
+    printf("List of commands: \n");
 
-  for(i = 0; i < num_builtins(); i++) {
-    printf("  %s\n", builtin_cmd[i]);
-  }
-  return 1;
+    for(i = 0; i < num_builtins(); i++) {
+        printf("  %s\n", builtin_cmd[i]);
+    }
+    return 1;
 }
 
 
 /* MKDIR - creates a new directory/folder */
 int shell_mkdir(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* MOVE - moves one or more files from one directory to another directory */
 int shell_move(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* RENAME - rename a file or files */
 int shell_rename(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* RMDIR - removes a directory */
 int shell_rmdir(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* TIME - displays or sets asystem time */
 int shell_time(char **args) {
-  return 1;
+    return 1;
 }
 
 
 /* TYPE - displays the contents of a text file */
 int shell_type(char **args) {
-  return 1;
+    return 1;
 }
-
 
 /* A signal for the command loop to terminate */
 int shell_exit(char **args) {
-  return 0;
+    return 0;
 }
 
+/* Converts tokens to lowercase to remove case sensitivity */
+char *toLowerCase(char *str) {
+	for(int i = 0; str[i]; i++){
+	    str[i] = tolower(str[i]);
+	}
+	return str;
+}
 
 /* launch either a builtin or a proces */
 int shell_execute(char **args) {
-  int i;
+    toLowerCase(args[0]);
+    int i;
 
-  if(args[0] == NULL) {
-    // empty command input
-    return 1;
-  }
-
-  for(i = 0; i < num_builtins(); i++) {
-      if(strcmp(args[0], "cd..") == 0) {
-        args[0] = "cd";
-        args[1] = "..";
-      }
-    if(strcmp(args[0], builtin_cmd[i]) == 0) {
-       return(*builtin_func[i])(args);
+    if(args[0] == NULL) {
+        return 1;
     }
-  }
-  printf("Error: \"%s\"is not a builtin command.", args[0]);
-  return 1;
+
+    for(i = 0; i < num_builtins(); i++) {
+        if(strcmp(args[0], "cd..") == 0) {
+            args[0] = "cd";
+            args[1] = "..";
+        }
+        if(strcmp(args[0], builtin_cmd[i]) == 0) {
+            return(*builtin_func[i])(args);
+        }
+    }
+    printf("Error: \"%s\"is not a builtin command.", args[0]);
+    return 1;
 }
 
 
 /* Reads a line of input from stdin */
 char *read_line(void) {
-  int bufsize = RL_BUFSIZE;
-  int position = 0;
-  char *buffer = malloc(sizeof(char) * bufsize);
-  int c;
+    int bufsize = RL_BUFSIZE;
+    int position = 0;
+    char *buffer = malloc(sizeof(char) * bufsize);
+    int c;
 
-  if (!buffer) {
-    fprintf(stderr, "Allocation error!\n");
-    exit(EXIT_FAILURE);
-  }
-
-  while(1) {
-    // read a character
-    c = getchar();
-
-    // if we hit EOF, replace it with a null character and return
-    // EOF us an integer, not a character
-    if (c == EOF || c == '\n') {
-      buffer[position] = '\0';
-      return buffer;
-    } else {
-      buffer[position] = c;
-    }
-    position++;
-
-    // if we have exceeded the buffer, reallocate.
-    if (position >= bufsize) {
-      bufsize += RL_BUFSIZE;
-      buffer = realloc(buffer, bufsize);
-      if (!buffer) {
+    if (!buffer) {
         fprintf(stderr, "Allocation error!\n");
         exit(EXIT_FAILURE);
-      }
     }
-  }
-}
 
+    while(1) {
+        c = getchar();  // Read a character
+
+        /* If we hit EOF, replace it with a null character and return
+         * EOF as an integer, not a character
+         */
+        if (c == EOF || c == '\n') {
+            buffer[position] = '\0';
+            return buffer;
+        } else {
+            buffer[position] = c;
+        }
+        position++;
+
+        // If we have exceeded the buffer, reallocate.
+        if (position >= bufsize) {
+            bufsize += RL_BUFSIZE;
+            buffer = realloc(buffer, bufsize);
+            if (!buffer) {
+                fprintf(stderr, "Allocation error!\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+}
 
 /* Separate the command string into program and arguments */
 char **split_line(char *line) {
-  int bufsize = TOK_BUFSIZE, position = 0;
-  char **tokens = malloc(bufsize * sizeof(char*));
-  char *token;
+    int bufsize = TOK_BUFSIZE, position = 0;
+    char **tokens = malloc(bufsize * sizeof(char*));
+    char *token;
 
-  if (!tokens) {
-    fprintf(stderr, "Allocation error!\n");
-    exit(EXIT_FAILURE);
-  }
-  token = strtok(line, TOK_DELIM);
-  while(token != NULL) {
-    tokens[position] = token;
-    position++;
-
-    if (position >= bufsize) {
-      bufsize += TOK_BUFSIZE;
-      tokens = realloc(tokens, bufsize * sizeof(char*));
-      if (!tokens) {
+    if (!tokens) {
         fprintf(stderr, "Allocation error!\n");
         exit(EXIT_FAILURE);
-      }
     }
 
-    token = strtok(NULL, TOK_DELIM);
-  }
-  tokens[position] = NULL;
-  return tokens;
+    token = strtok(line, TOK_DELIM);
+
+    while(token != NULL) {
+        tokens[position] = token;
+        position++;
+
+        if (position >= bufsize) {
+            bufsize += TOK_BUFSIZE;
+            tokens = realloc(tokens, bufsize * sizeof(char*));
+            if (!tokens) {
+                fprintf(stderr, "Allocation error!\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        token = strtok(NULL, TOK_DELIM);
+    }
+
+    tokens[position] = NULL;
+
+    return tokens;
 }
 
-/* A loop getting an input and executing it */
+/* THE COMMAND LOOP */
 void loop(void) {
-  char *line;
-  char **args;
-  int status;
+    char *line;     // Array of characters from user input
+    char **args;    // Formatted array of characters ready for execution
+    int status;
 
-  do {
-    // get the current directory where the program is running
-    GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);
-    printf(("\n%s>"), CurDir_Buffer);
+    do {
+        GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);      // Get the current directory where the program is running
+        printf(("\n%s>"), CurDir_Buffer);                     // Print current directory
+        line = read_line();                                   // Read the command from the standard input
 
-    // read the command from the standard input
-    line = read_line();
+        /*
+         * Parsing/separation/tokenization of the command string
+         * into a program and arguments.
+         */
+        args = split_line(line);
 
-    /* parsing/separation/tokenization of the command string
-     * into a program and arguments.
-     */
-    args = split_line(line);
+        status = shell_execute(args);       // Run the parsed command
 
-    // run the parsed command
-    status = shell_execute(args);
-
-    free(line);
-    free(args);
-  } while(status != 0); // loop until the user doesn't "exit" the program
+        free(line);                         // Deallocates the memory previously allocated
+        free(args);
+    } while(status != 0);                   // Loop until the user doesn't "exit" the program
 }
 
 
-// MAIN FUNCTION
-
+/*  MAIN FUNCTION */
 int main() {
-  do {
-    restart = 0;
-    loop();
-    if(restart == 0) {
-      return EXIT_SUCCESS;
-    }
-  }while(restart == 1);
+    printf("SHELL (Version 1.0)\n");
+    printf("CMSC 125 Operating Systems Capstone Project by Okiya and Lumanta.\n");
+    do {
+        restart = 0;
+        loop();
+        if(restart == 0) {
+            return EXIT_SUCCESS;
+        }
+     } while(restart == 1);
 
   return 0;
 }
