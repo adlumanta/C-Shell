@@ -10,19 +10,19 @@
  * Lumanta, Angelo Rey
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <conio.h>        //  "Console Input Output Header File” - manages input/output on console based application.
-#include <ctype.h>
-#include <dirent.h>
-#include <stdio.h>         // Standard I/O
-#include <stdlib.h>
-#include <string.h>
-#include <tchar.h>
-#include <unistd.h>
-#include <windows.h>
-#include <time.h>          // Get time format
 
+#include <conio.h>          // "Console Input Output Header File” - manages input/output on console based application.
+#include <ctype.h>          // tolower()
+#include <dirent.h>         // DIR, d, opendir(), readdir(), closedir()
+#include <stdio.h>          // Standard I/O: printf(), fprintf(), stderr, perror(), getchar()
+#include <stdlib.h>         // malloc(), realloc(), free(), EXIT_FAILURE, EXIT_SUCCESS
+#include <string.h>         // strcmp(), strtok()
+#include <sys/stat.h>       // S_ISREG, mkdir()
+#include <unistd.h>         // chdir()
+#include <windows.h>        // Macros
+#include <time.h>           // Get time format
+
+// windows.h Macros
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
 #endif
@@ -62,7 +62,7 @@ int shell_time(char **args);
 int shell_type(char **args);
 
 
-/* List of builtin commands followed by their correspondng functions */
+// buitlin functions in their string form.
 char *builtin_cmd[] = {
   "cd",
   "chdir",
@@ -83,6 +83,7 @@ char *builtin_cmd[] = {
 };
 
 
+//list of addresses of the builtin functions
 int(*builtin_func[]) (char **) = {
   &shell_cd,
   &shell_chdir,
@@ -103,6 +104,7 @@ int(*builtin_func[]) (char **) = {
 };
 
 
+// number of builtin functions
 int num_builtins() {
     return sizeof(builtin_cmd) / sizeof(char *);
 }
