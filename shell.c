@@ -190,8 +190,10 @@ int shell_cls(char **args) {
 
 /* CMD - Starts a new instance of the command interpreter/shell */
 int shell_cmd() {
-    restart = 1;// flagged to start a new instance of the shell.
-    return 0; // gets out of the current loop
+    printf("SHELL (Version 1.0)\n");
+    printf("CMSC 125 Operating Systems Capstone Project by Okiya and Lumanta.\n");
+    restart = 1;
+return 1;
 }
 
 
@@ -524,6 +526,7 @@ void loop(void) {
 int main() {
     printf("SHELL (Version 1.0)\n");
     printf("CMSC 125 Operating Systems Capstone Project by Okiya and Lumanta.\n");
+
     do {
         restart = 0;
         loop();
