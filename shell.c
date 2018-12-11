@@ -22,17 +22,17 @@
 #include <windows.h>        // Macros
 #include <time.h>           // Get time format
 
-// windows.h Macros
+/* windows.h Macros */
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
 #endif
 
 #define _WIN32_WINNT 0x0501
 
-// Read Line Input
+/* Read Line Input */
 #define RL_BUFSIZE 1024
 
-// Split Line Input
+/* Split Line Input */
 #define TOK_BUFSIZE 64
 #define TOK_DELIM " \t\r\n\a"
 #define TOK_DELIM_TIME_DATE ":"
@@ -43,7 +43,9 @@ TCHAR CurDir_Buffer[BUFFER_SIZE + 1];           // CurDir_Buffer is the containe
 
 int restart = 0;                                // variable that controls the relaunch of the shell
 
+
 /* BUILTIN FUNCTIONS INITIALIZATION */
+
 int shell_cd(char **args);
 int shell_chdir(char **args);
 int shell_cls(char **args);
@@ -62,7 +64,7 @@ int shell_time(char **args);
 int shell_type(char **args);
 
 
-// buitlin functions in their string form.
+/* buitlin functions in their string form. */
 char *builtin_cmd[] = {
   "cd",
   "chdir",
@@ -83,7 +85,7 @@ char *builtin_cmd[] = {
 };
 
 
-//list of addresses of the builtin functions
+/* list of addresses of the builtin functions */
 int(*builtin_func[]) (char **) = {
   &shell_cd,
   &shell_chdir,
@@ -104,7 +106,7 @@ int(*builtin_func[]) (char **) = {
 };
 
 
-// number of builtin functions
+/* number of builtin functions */
 int num_builtins() {
     return sizeof(builtin_cmd) / sizeof(char *);
 }
@@ -210,12 +212,74 @@ int shell_cmd() {
 
 /* COPY - copies one or more files to another location */
 int shell_copy(char **args) {
+    FILE *in, *out;
+    int ch;
+
+    if(args[1] == NULL) {
+        fprintf(stderr, "No file selected! \n");
+    }
+    else if (args[2] == NULL) {
+        fprintf(stderr, "Invalid location! \n");
+    }
+    else {
+        /* open the source file in read mode */
+        in = fopen(args[1], "r");
+
+        /* jump to the destination path */
+        chdir(args[2]);
+
+        /* open the destination file in write mode */
+        out = fopen(args[1], "w+");
+
+        /* copying the contents of the source file into the target file*/
+        while(1) {
+            ch = fgetc(in);
+            if(feof(in)) {
+                break;
+            }
+            fprintf(out, "%c", ch);
+        }
+
+        /* closing the opened files */
+        fclose(in);
+        fclose(out);
+
+        /* back to the directory where we left off */
+        chdir("..");
+
+        printf("Successfully copied the file! \n");
+    }
+
     return 1;
 }
 
 
 /* DATE - displays the date */
 int shell_date(char **args) {
+    char *month_text[] = {"","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    char *day_text[] = {"","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    SYSTEMTIME time;
+
+    if(args[1] == NULL) {
+        /* show time if no parameters */
+        GetSystemTime(&time);           
+        int year = time.wYear;
+        int month = time.wMonth;
+        int day = time.wDay;
+        int week;
+
+        /* calculate what day it is using Key value method */
+        week =  ( (day+=(month <3? year -- :(year -2))), (23* month/9+ day +4 + year /4- year /100+ year/400) ) % 7;
+
+        printf("The current date is: %s, %s-%d-%d \n",day_text[week],month_text[time.wMonth],time.wDay,time.wYear);    
+    }
+
+    /* set date in month-day-year format */
+    char *new_date[10];
+    printf("Enter the new date: (mm-dd-yyyy): ");
+    scanf("%s", new_date);
+    SetLocalTime(new_date);
+
     return 1;
 }
 
@@ -226,7 +290,8 @@ int shell_del(char **args) {
         fprintf(stderr, "Expected argument to \"del\"\n");
     }
     else {
-        if(is_regular_file(args[1])) {    // File checker
+        /* File checker */
+        if(is_regular_file(args[1])) {
             remove(args[1]);
         } else {
             printf("Unsuccessful. Either you are trying to delete a folder or the file does not exist.\n");
@@ -248,17 +313,19 @@ int shell_dir(char **args) {
 
     d = opendir(".");       // opendir() returns a pointer of DIR type.
 
-    // opendir returns NULL if couldn't open directory
+    /* opendir returns NULL if couldn't open directory */
     if (d == NULL) {
         printf("Could not open current directory");
     }
     printf(" DATE MODIFIED  \t\t\t  FILES/FOLDERS\n");
     while ((dir = readdir(d)) != NULL) {
         stat(dir->d_name, &attr);
-        timeStamp = localtime (&attr.st_mtime);                         //Getting time modification attributes of the directory/file
+        timeStamp = localtime (&attr.st_mtime);                         // Getting time modification attributes of the directory/file
         strftime(time, sizeof(time), "%m/%d/%Y %I:%M %p", timeStamp);
         printf("%20s ----- ", time);
-        if(is_directory(dir->d_name)) {                                   // File checker
+
+        /* File checker */
+        if(is_directory(dir->d_name)) {                                
             printf("<FOLDER> ----- ");
         } else {
             printf("<FILE> ------- ");
@@ -305,7 +372,7 @@ int shell_mkdir(char **args) {
     char* dirname = args[1];
     check = mkdir(dirname);
 
-    // Check if directory is created or not
+    /* Check if directory is created or not */
     if(!check) {
         printf("Successfully created the directory. \n");
     }
@@ -319,6 +386,46 @@ int shell_mkdir(char **args) {
 
 /* MOVE - moves one or more files from one directory to another directory */
 int shell_move(char **args) {
+    FILE *in, *out;
+    int ch;
+
+    if(args[1] == NULL) {
+        fprintf(stderr, "No file selected! \n");
+    }
+    else if (args[2] == NULL) {
+        fprintf(stderr, "Invalid location! \n");
+    }
+    else {
+        /* open the source file in read mode */
+        in = fopen(args[1], "r");
+
+        /* jump to the destination path */
+        chdir(args[2]);
+
+        /* open the destination file in write mode */
+        out = fopen(args[1], "w+");
+
+
+        /* copying the contents of the source file into the target file*/
+        while(1) {
+            ch = fgetc(in);
+            if(feof(in)) {
+                break;
+            }
+            fprintf(out, "%c", ch);
+        }
+
+        /* closing the opened files */
+        fclose(in);
+        fclose(out);
+
+        /* back to the directory where we left off */
+        chdir("..");
+
+        /* removing the source file */
+        remove(args[1]);
+        printf("Successfully moved the file! \n");
+    }
     return 1;
 }
 
@@ -326,14 +433,15 @@ int shell_move(char **args) {
 /* RENAME - rename a file or files */
 int shell_rename(char **args) {
 
-    // checks whether args[1] or args[2] is emptyd
+    // checks whether args[1] or args[2] is empty
     if(args[1] == NULL || args[2] == NULL) {
         fprintf(stderr, "Expected argument to \"rename\"\n");
     }
     else {
-        // args[1] - existing file name, args[2] - new file name
-        // if the rename function's return value is 0, then the file changed its name successfully.
-        // else, an error is returned.
+        /* args[1] - existing file name, args[2] - new file name
+           if the rename function's return value is 0, then the file changed its name successfully.
+           else, an error is returned.
+        */
         if(rename(args[1], args[2]) == 0) {
             printf("Successfully renamed the file. \n");
         }
@@ -353,7 +461,8 @@ int shell_rmdir(char **args) {
         fprintf(stderr, "Expected argument to \"rmdir\"\n");
     }
     else {
-        if(is_directory(args[1])) {    // File checker
+        /* File checker */
+        if(is_directory(args[1])) {                          
             rmdir(args[1]);
         } else {
             printf("Unsuccessful. Either you are trying to delete a file or the folder does not exist.\n");
@@ -368,27 +477,34 @@ int shell_time(char **args) {
     SYSTEMTIME time;
 
     if(args[1] == NULL){
+        /* show current time in hours, minutes, and seconds */
         GetLocalTime(&time);
         printf("The current time is: %d:%d:%d\n",time.wHour, time.wMinute, time.wSecond);
     }
-    // TODO SetTime NOTE: I did everything but it does not work on my laptop.
+    
+    /* set time in hours:minutes:seconds format*/
+    char *new_time[10];
+    printf("Enter the new time: (hh:mm:ss) ");
+    scanf("%s", new_time);
+    SetLocalTime(new_time);
+
     return 1;
 }
 
 
 /* TYPE - displays the contents of a text file */
 int shell_type(char **args) {
-    FILE *file;     // Initialize an object of the type FILE, which contains all the information necessary to control the stream
+    FILE *file;                                              // Initialize an object of the type FILE, which contains all the information necessary to control the stream
     char ch;
 
-    file = fopen(args[1], "r");     // r - read file only
+    file = fopen(args[1], "r");                              // r - read file only   
     if (file == NULL) {
         printf("File does not exist.\n");
         return 1;
     }
 
     /* Read contents if the text file exists */
-    ch = fgetc(file);   // Used to obtain input from a file single character at a time
+    ch = fgetc(file);                                        // Used to obtain input from a file single character at a time
     while (ch != EOF) {
         printf ("%c", ch);
         ch = fgetc(file);
@@ -447,7 +563,7 @@ char *read_line(void) {
     }
 
     while(1) {
-        c = getchar();  // Read a character
+        c = getchar();                                       // Read a character
 
         /* If we hit EOF, replace it with a null character and return
          * EOF as an integer, not a character
@@ -460,8 +576,7 @@ char *read_line(void) {
         }
         position++;
 
-        // If we have exceeded the buffer, reallocate.
-        if (position >= bufsize) {
+        if (position >= bufsize) {                           // If we have exceeded the buffer, reallocate.
             bufsize += RL_BUFSIZE;
             buffer = realloc(buffer, bufsize);
             if (!buffer) {
@@ -487,7 +602,7 @@ char **split_line(char *line) {
     token = strtok(line, TOK_DELIM);
 
     while(token != NULL) {
-        tokens[position] = token;
+        tokens[position] = token; 
         position++;
 
         if (position >= bufsize) {
@@ -510,28 +625,24 @@ char **split_line(char *line) {
 
 /* THE COMMAND LOOP */
 void loop(void) {
-    char *line;     // Array of characters from user input
-    char **args;    // Formatted array of characters ready for execution
+    char *line;                                               // Array of characters from user input
+    char **args;                                              // Formatted array of characters ready for execution
     int status;
 
     do {
         GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);      // Get the current directory where the program is running
         printf(("\n%s>"), CurDir_Buffer);                     // Print current directory
         line = read_line();                                   // Read the command from the standard input
-        /*
-         * Parsing/separation/tokenization of the command string
-         * into a program and arguments.
-         */
-        args = split_line(line);
+        args = split_line(line);                              // Parsing/separation/tokenization of the command string  into a program and arguments. //
         if(args[0] == NULL) {
-            status = 1;                         // Resolve enter-terminate program issue
+            status = 1;                                       // Resolve enter-terminate program issue
         } else {
-            status = shell_execute(args);       // Run the parsed command
+            status = shell_execute(args);                     // Run the parsed command
         }
 
-        free(line);                         // Deallocates the memory previously allocated
+        free(line);                                           // Deallocates the memory previously allocated
         free(args);
-    } while(status != 0);                   // Loop until the user doesn't "exit" the program
+    } while(status != 0);                                     // Loop until the user doesn't "exit" the program
 }
 
 
