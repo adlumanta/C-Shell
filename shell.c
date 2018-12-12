@@ -109,6 +109,7 @@ int(*builtin_func[]) (char **) = {
 /* number of builtin functions */
 int num_builtins() {
     return sizeof(builtin_cmd) / sizeof(char *);
+<<<<<<< HEAD
 }
 
 
@@ -128,6 +129,27 @@ int is_directory(const char *path) {
 }
 
 
+=======
+}
+
+
+/* Checks whether a file is a directory or just a file */
+int is_regular_file(const char *path) {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISREG(path_stat.st_mode);
+}
+
+
+/* Checking for rmdir */
+int is_directory(const char *path) {
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISDIR(path_stat.st_mode);
+}
+
+
+>>>>>>> master
 /* Converts tokens to lowercase to remove case sensitivity */
 char *toLowerCase(char *str) {
     for(int i = 0; str[i]; i++){
@@ -264,7 +286,11 @@ int shell_date(char **args) {
 
     if(args[1] == NULL) {
         /* show time if no parameters */
+<<<<<<< HEAD
         GetSystemTime(&time);           
+=======
+        GetSystemTime(&time);
+>>>>>>> master
         int year = time.wYear;
         int month = time.wMonth;
         int day = time.wDay;
@@ -273,7 +299,11 @@ int shell_date(char **args) {
         /* calculate what day it is using Key value method */
         week =  ( (day+=(month <3? year -- :(year -2))), (23* month/9+ day +4 + year /4- year /100+ year/400) ) % 7;
 
+<<<<<<< HEAD
         printf("The current date is: %s, %s-%d-%d \n",day_text[week],month_text[time.wMonth],time.wDay,time.wYear);    
+=======
+        printf("The current date is: %s, %s-%d-%d \n",day_text[week],month_text[time.wMonth],time.wDay,time.wYear);
+>>>>>>> master
     }
 
     /* set date in month-day-year format */
@@ -327,7 +357,11 @@ int shell_dir(char **args) {
         printf("%20s ----- ", time);
 
         /* File checker */
+<<<<<<< HEAD
         if(is_directory(dir->d_name)) {                                
+=======
+        if(is_directory(dir->d_name)) {
+>>>>>>> master
             printf("<FOLDER> ----- ");
         } else {
             printf("<FILE> ------- ");
@@ -464,7 +498,11 @@ int shell_rmdir(char **args) {
     }
     else {
         /* File checker */
+<<<<<<< HEAD
         if(is_directory(args[1])) {                          
+=======
+        if(is_directory(args[1])) {
+>>>>>>> master
             rmdir(args[1]);
         } else {
             printf("Unsuccessful. Either you are trying to delete a file or the folder does not exist.\n");
@@ -483,7 +521,11 @@ int shell_time(char **args) {
         GetLocalTime(&time);
         printf("The current time is: %d:%d:%d\n",time.wHour, time.wMinute, time.wSecond);
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> master
     /* set time in hours:minutes:seconds format*/
     char *new_time[10];
     printf("Enter the new time: (hh:mm:ss) ");
@@ -499,7 +541,11 @@ int shell_type(char **args) {
     FILE *file;                                              // Initialize an object of the type FILE, which contains all the information necessary to control the stream
     char ch;
 
+<<<<<<< HEAD
     file = fopen(args[1], "r");                              // r - read file only   
+=======
+    file = fopen(args[1], "r");                              // r - read file only
+>>>>>>> master
     if (file == NULL) {
         printf("File does not exist.\n");
         return 1;
@@ -532,11 +578,19 @@ int shell_exit(char **args) {
 int shell_execute(char **args) {
     toLowerCase(args[0]);
     int i;
+<<<<<<< HEAD
 
     if(args[0] == NULL) {
         return 1;
     }
 
+=======
+
+    if(args[0] == NULL) {
+        return 1;
+    }
+
+>>>>>>> master
     for(i = 0; i < num_builtins(); i++) {
         if(strcmp(args[0], "cd..") == 0) {
             args[0] = "cd";
@@ -604,7 +658,11 @@ char **split_line(char *line) {
     token = strtok(line, TOK_DELIM);
 
     while(token != NULL) {
+<<<<<<< HEAD
         tokens[position] = token; 
+=======
+        tokens[position] = token;
+>>>>>>> master
         position++;
 
         if (position >= bufsize) {
@@ -615,6 +673,7 @@ char **split_line(char *line) {
                 exit(EXIT_FAILURE);
             }
         }
+<<<<<<< HEAD
 
         token = strtok(NULL, TOK_DELIM);
     }
@@ -642,6 +701,35 @@ void loop(void) {
             status = shell_execute(args);                     // Run the parsed command
         }
 
+=======
+
+        token = strtok(NULL, TOK_DELIM);
+    }
+
+    tokens[position] = NULL;
+
+    return tokens;
+}
+
+
+/* THE COMMAND LOOP */
+void loop(void) {
+    char *line;                                               // Array of characters from user input
+    char **args;                                              // Formatted array of characters ready for execution
+    int status;
+
+    do {
+        GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);      // Get the current directory where the program is running
+        printf(("\n%s>"), CurDir_Buffer);                     // Print current directory
+        line = read_line();                                   // Read the command from the standard input
+        args = split_line(line);                              // Parsing/separation/tokenization of the command string  into a program and arguments. //
+        if(args[0] == NULL) {
+            status = 1;                                       // Resolve enter-terminate program issue
+        } else {
+            status = shell_execute(args);                     // Run the parsed command
+        }
+
+>>>>>>> master
         free(line);                                           // Deallocates the memory previously allocated
         free(args);
     } while(status != 0);                                     // Loop until the user doesn't "exit" the program
