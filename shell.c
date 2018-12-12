@@ -128,22 +128,6 @@ int is_directory(const char *path) {
 }
 
 
-/* Checks whether a file is a directory or just a file */
-int is_regular_file(const char *path) {
-    struct stat path_stat;
-    stat(path, &path_stat);
-    return S_ISREG(path_stat.st_mode);
-}
-
-
-/* Checking for rmdir */
-int is_directory(const char *path) {
-    struct stat path_stat;
-    stat(path, &path_stat);
-    return S_ISDIR(path_stat.st_mode);
-}
-
-
 /* Converts tokens to lowercase to remove case sensitivity */
 char *toLowerCase(char *str) {
     for(int i = 0; str[i]; i++){
@@ -631,31 +615,6 @@ char **split_line(char *line) {
                 fprintf(stderr, "Allocation error!\n");
                 exit(EXIT_FAILURE);
             }
-        }
-        token = strtok(NULL, TOK_DELIM);
-    }
-
-    tokens[position] = NULL;
-
-    return tokens;
-}
-
-
-/* THE COMMAND LOOP */
-void loop(void) {
-    char *line;                                               // Array of characters from user input
-    char **args;                                              // Formatted array of characters ready for execution
-    int status;
-
-    do {
-        GetCurrentDirectory(BUFFER_SIZE, CurDir_Buffer);      // Get the current directory where the program is running
-        printf(("\n%s>"), CurDir_Buffer);                     // Print current directory
-        line = read_line();                                   // Read the command from the standard input
-        args = split_line(line);                              // Parsing/separation/tokenization of the command string  into a program and arguments. //
-        if(args[0] == NULL) {
-            status = 1;                                       // Resolve enter-terminate program issue
-        } else {
-            status = shell_execute(args);                     // Run the parsed command
         }
         token = strtok(NULL, TOK_DELIM);
     }
