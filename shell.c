@@ -264,7 +264,7 @@ int shell_date(char **args) {
 
     if(args[1] == NULL) {
         /* show time if no parameters */
-        GetSystemTime(&time);           
+        GetSystemTime(&time);
         int year = time.wYear;
         int month = time.wMonth;
         int day = time.wDay;
@@ -273,7 +273,7 @@ int shell_date(char **args) {
         /* calculate what day it is using Key value method */
         week =  ( (day+=(month <3? year -- :(year -2))), (23* month/9+ day +4 + year /4- year /100+ year/400) ) % 7;
 
-        printf("The current date is: %s, %s-%d-%d \n",day_text[week],month_text[time.wMonth],time.wDay,time.wYear);    
+        printf("The current date is: %s, %s-%d-%d \n",day_text[week],month_text[time.wMonth],time.wDay,time.wYear);
     }
 
     /* set date in month-day-year format */
@@ -327,7 +327,7 @@ int shell_dir(char **args) {
         printf("%20s ----- ", time);
 
         /* File checker */
-        if(is_directory(dir->d_name)) {                                
+        if(is_directory(dir->d_name)) {
             printf("<FOLDER> ----- ");
         } else {
             printf("<FILE> ------- ");
@@ -464,7 +464,7 @@ int shell_rmdir(char **args) {
     }
     else {
         /* File checker */
-        if(is_directory(args[1])) {                          
+        if(is_directory(args[1])) {
             rmdir(args[1]);
         } else {
             printf("Unsuccessful. Either you are trying to delete a file or the folder does not exist.\n");
@@ -483,7 +483,7 @@ int shell_time(char **args) {
         GetLocalTime(&time);
         printf("The current time is: %d:%d:%d\n",time.wHour, time.wMinute, time.wSecond);
     }
-    
+
     /* set time in hours:minutes:seconds format*/
     char *new_time[10];
     printf("Enter the new time: (hh:mm:ss) ");
@@ -499,7 +499,7 @@ int shell_type(char **args) {
     FILE *file;                                              // Initialize an object of the type FILE, which contains all the information necessary to control the stream
     char ch;
 
-    file = fopen(args[1], "r");                              // r - read file only   
+    file = fopen(args[1], "r");                              // r - read file only
     if (file == NULL) {
         printf("File does not exist.\n");
         return 1;
@@ -604,7 +604,7 @@ char **split_line(char *line) {
     token = strtok(line, TOK_DELIM);
 
     while(token != NULL) {
-        tokens[position] = token; 
+        tokens[position] = token;
         position++;
 
         if (position >= bufsize) {
