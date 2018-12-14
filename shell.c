@@ -264,7 +264,7 @@ int shell_date(char **args) {
 
     if(args[1] == NULL) {
         /* show time if no parameters */
-        GetSystemTime(&time);           
+        GetSystemTime(&time);
         int year = time.wYear;
         int month = time.wMonth;
         int day = time.wDay;
@@ -483,7 +483,7 @@ int shell_time(char **args) {
         GetLocalTime(&time);
         printf("The current time is: %d:%d:%d\n",time.wHour, time.wMinute, time.wSecond);
     }
-  
+
     /* set time in hours:minutes:seconds format*/
     char *new_time[10];
     printf("Enter the new time: (hh:mm:ss) ");
@@ -533,7 +533,7 @@ int shell_exit(char **args) {
 int shell_execute(char **args) {
     toLowerCase(args[0]);
     int i;
-  
+
     if(args[0] == NULL) {
         return 1;
     }
